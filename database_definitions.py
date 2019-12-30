@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 
 # define connectors
-engine = create_engine("sqlite:///configuration.db", echo=False)
+engine = create_engine("sqlite:///configuration.db", echo=True)
 Base = declarative_base()
 
 class GroupCompetitorAssociation(Base):
@@ -67,8 +67,8 @@ class Weight(Base):
     weight_min = Column(Float)
     weight_max = Column(Float)
     tolerance = Column(Float)
-    weight_collection_id = Column(Integer, ForeignKey("weight_collections.id"))
-    weight_collection = relationship("WeightCollection", back_populates="weights")
+    weight_collection = Column(Integer, ForeignKey("weight_collections.id"))
+    #weight_collection = relationship("WeightCollection", back_populates="weights")
 
     def __repr__(self):
         return "<Weight: {0}>".format(self.name)
@@ -78,7 +78,7 @@ class WeightCollection(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    weights = relationship("Weight", back_populates="weight_collection")
+    weights = relationship("Weight")
 
     def __repr__(self):
         return "<WeightCollection: {0} ({1})>".format(self.name, "|".join([w.name for w in self.weights]))
@@ -159,6 +159,7 @@ ijf_weights_female = WeightCollection(name="IJF female")
 session.add_all([male, female])
 session.add_all([u18, adults, adults30])
 session.add_all([ijf_weights_male, ijf_weights_female])
+session.commit()
 
 weights = []
 weights.append(Weight(name="- 60 kg",  weight_min=None,  weight_max=60.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
@@ -189,10 +190,9 @@ _groups = [[u18,      female, ijf_weights_female],
 
 for age, gender, weight_collection in _groups:
     print(age, gender, weight_collection)
-    for weight_cat_id in weight_collection.weights:
-        # HERE IS AN ERROR, no weights within weight_collection ??? 
-        groups.append(Group(age=age.id, weight=weight_cat_id, gender=gender.id))
-        print(groups)
+    for weight in weight_collection.weights:
+        # HERE IS AN ERROR, no weights within weight_collection ???
+        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id))
 
 session.add_all(groups)
 
