@@ -31,6 +31,9 @@ class Competitor(Base):
 
     groups = relationship("Group", secondary=association_competitor_groups, back_populates="competitors")
 
+    def __repr__(self):
+        return "<Competitor: {0} {1} ({2})>".format(self.firstname, self.name, self.club.name)
+
 class Age(Base):
     __tablename__ = "age_categories"
     
@@ -39,12 +42,18 @@ class Age(Base):
     age_min = Column(Integer)
     age_max = Column(Integer)
 
+    def __repr__(self):
+        return "<Age: {0}>".format(self.name)
+
 class Gender(Base):
     __tablename__ = "gender_categories"
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
     name_long = Column(String)
+
+    def __repr__(self):
+        return "<Gender: {0}>".format(self.name)
     
 class Weight(Base):
     __tablename__ = "weight_categories"
@@ -55,6 +64,9 @@ class Weight(Base):
     weight_max = Column(Float)
     tolerance = Column(Float)
 
+    def __repr__(self):
+        return "<Weight: {0}>".format(self.name)
+
 class Mode(Base):
     __tablename__ = "modes"
     
@@ -64,6 +76,9 @@ class Mode(Base):
     competitors_min = Column(Integer)
     competitors_max = Column(Integer)
     template = Column(String)
+
+    def __repr__(self):
+        return "<Mode: {0}>".format(self.name)
 
 class Group(Base):
     __tablename__ = "groups"
@@ -145,11 +160,12 @@ _groups = [[w_female, u18, female],
 
 for weight_classes, age, gender in _groups:
     for weight in weight_classes:
-        groups.append(Group(age=age, weight=weight, gender=gender, mode=None))
+        groups.append(Group(age=age, weight=weight, gender=gender, mode=0))
 
 session.add_all([male, female])
 session.add_all([u18, adults, adults30])
 session.add_all([*w_male, *w_female])
+session.add(Mode())
 session.add_all(groups)
 
 session.commit()
