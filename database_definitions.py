@@ -4,12 +4,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 
 # define connectors
-engine = create_engine("sqlite:///:memory:", echo=True)
+engine = create_engine("sqlite:///configuration.db", echo=True)
 Base = declarative_base()
 
-association_competitor_groups = Table('association', Base.metadata,
-    Column('competitor', Integer, ForeignKey('competitors.id')),
-    Column('group', Integer, ForeignKey('groups.id')))
+association_gc = Table('association', Base.metadata,
+    Column('group', Integer, ForeignKey('groups.id')),
+    Column('competitor', Integer, ForeignKey('competitors.id')))
 
 class Club(Base):
     __tablename__ = "clubs"
@@ -29,7 +29,7 @@ class Competitor(Base):
     year_of_birth = Column(Integer)
     nationality = Column(String)
 
-    groups = relationship("Group", secondary=association_competitor_groups, back_populates="competitors")
+    groups = relationship("Group", secondary=association_gc, back_populates="competitors")
 
     def __repr__(self):
         return "<Competitor: {0} {1} ({2})>".format(self.firstname, self.name, self.club.name)
@@ -89,9 +89,12 @@ class Group(Base):
     age = Column(Integer, ForeignKey("age_categories.id"))
     mode = Column(Integer, ForeignKey("modes.id"))
 
-    competitors = relationship("Competitor", secondary=association_competitor_groups, back_populates="groups")
+    competitors = relationship("Competitor", secondary=association_gc, back_populates="groups")
     fights = relationship("Fight")
     results = relationship("Result")
+
+    def __repr__(self):
+        return "<Group {0}: {1} {2} {3}>".format(self.id, self.gender.name, self.age.name, self.weight.name)
 
 class Fight(Base):
     __tablename__ = "fights"
@@ -114,7 +117,6 @@ class Result(Base):
     place = Column(Integer)
     fighter = Column(Integer, ForeignKey('competitors.id'))
     group = Column(Integer, ForeignKey("groups.id"))
-    
     
 ### populate tables
 
@@ -151,6 +153,11 @@ w78  = Weight(name="- 78 kg", weight_min=70.0, weight_max=78.0, tolerance=0.1)
 wp78 = Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, tolerance=0.1)
 w_female = [w48, w52, w57, w63, w70, w78, wp78]
 
+session.add_all([male, female])
+session.add_all([u18, adults, adults30])
+session.add_all([*w_male, *w_female])
+session.commit()
+
 # make groups
 groups = []
 _groups = [[w_female, u18, female],
@@ -160,12 +167,8 @@ _groups = [[w_female, u18, female],
 
 for weight_classes, age, gender in _groups:
     for weight in weight_classes:
-        groups.append(Group(age=age, weight=weight, gender=gender, mode=0))
+        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id))
 
-session.add_all([male, female])
-session.add_all([u18, adults, adults30])
-session.add_all([*w_male, *w_female])
-session.add(Mode())
 session.add_all(groups)
 
 session.commit()
