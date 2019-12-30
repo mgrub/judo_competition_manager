@@ -4,13 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 
 # define connectors
-engine = create_engine("sqlite:///configuration.db", echo=True)
+engine = create_engine("sqlite:///configuration.db", echo=False)
 Base = declarative_base()
 
 class GroupCompetitorAssociation(Base):
     __tablename__ = "group_competitor_associations"
-    left_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
-    right_id = Column(Integer, ForeignKey('competitors.id'), primary_key=True)
+    group_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
+    competitor_id = Column(Integer, ForeignKey('competitors.id'), primary_key=True)
     local_lot = Column(Integer)
     group = relationship("Group", back_populates="competitors")
     competitor = relationship("Competitor", back_populates="groups")
@@ -67,9 +67,21 @@ class Weight(Base):
     weight_min = Column(Float)
     weight_max = Column(Float)
     tolerance = Column(Float)
+    weight_collection_id = Column(Integer, ForeignKey("weight_collections.id"))
+    weight_collection = relationship("WeightCollection", back_populates="weights")
 
     def __repr__(self):
         return "<Weight: {0}>".format(self.name)
+
+class WeightCollection(Base):
+    __tablename__ = "weight_collections"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    weights = relationship("Weight", back_populates="weight_collection")
+
+    def __repr__(self):
+        return "<WeightCollection: {0} ({1})>".format(self.name, "|".join([w.name for w in self.weights]))
 
 class Mode(Base):
     __tablename__ = "modes"
@@ -141,39 +153,46 @@ u18 = Age(name="u18", age_min=14, age_max=17)
 adults = Age(name="open", age_min=16, age_max=None)
 adults30 = Age(name="+30", age_min=30, age_max=None)
 
-w60   = Weight(name="- 60 kg",  weight_min=None,  weight_max=60.0,  tolerance=0.1)
-w66   = Weight(name="- 66 kg",  weight_min=60.0,  weight_max=66.0,  tolerance=0.1)
-w73   = Weight(name="- 73 kg",  weight_min=66.0,  weight_max=73.0,  tolerance=0.1)
-w81   = Weight(name="- 81 kg",  weight_min=73.0,  weight_max=81.0,  tolerance=0.1)
-w90   = Weight(name="- 90 kg",  weight_min=81.0,  weight_max=90.0,  tolerance=0.1)
-w100  = Weight(name="- 100 kg", weight_min=90.0,  weight_max=100.0, tolerance=0.1)
-wp100 = Weight(name="+ 100 kg", weight_min=100.0, weight_max=None,  tolerance=0.1)
-w_male = [w60, w66, w73, w81, w90, w100, wp100]
-
-w48  = Weight(name="- 48 kg", weight_min=None, weight_max=48.0, tolerance=0.1)
-w52  = Weight(name="- 52 kg", weight_min=48.0, weight_max=52.0, tolerance=0.1)
-w57  = Weight(name="- 57 kg", weight_min=52.0, weight_max=57.0, tolerance=0.1)
-w63  = Weight(name="- 63 kg", weight_min=57.0, weight_max=63.0, tolerance=0.1)
-w70  = Weight(name="- 70 kg", weight_min=63.0, weight_max=70.0, tolerance=0.1)
-w78  = Weight(name="- 78 kg", weight_min=70.0, weight_max=78.0, tolerance=0.1)
-wp78 = Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, tolerance=0.1)
-w_female = [w48, w52, w57, w63, w70, w78, wp78]
+ijf_weights_male = WeightCollection(name="IJF male")
+ijf_weights_female = WeightCollection(name="IJF female")
 
 session.add_all([male, female])
 session.add_all([u18, adults, adults30])
-session.add_all([*w_male, *w_female])
+session.add_all([ijf_weights_male, ijf_weights_female])
+
+weights = []
+weights.append(Weight(name="- 60 kg",  weight_min=None,  weight_max=60.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="- 66 kg",  weight_min=60.0,  weight_max=66.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="- 73 kg",  weight_min=66.0,  weight_max=73.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="- 81 kg",  weight_min=73.0,  weight_max=81.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="- 90 kg",  weight_min=81.0,  weight_max=90.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="- 100 kg", weight_min=90.0,  weight_max=100.0, tolerance=0.1, weight_collection=ijf_weights_male.id))
+weights.append(Weight(name="+ 100 kg", weight_min=100.0, weight_max=None,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+
+weights.append(Weight(name="- 48 kg", weight_min=None, weight_max=48.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="- 52 kg", weight_min=48.0, weight_max=52.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="- 57 kg", weight_min=52.0, weight_max=57.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="- 63 kg", weight_min=57.0, weight_max=63.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="- 70 kg", weight_min=63.0, weight_max=70.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="- 78 kg", weight_min=70.0, weight_max=78.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+weights.append(Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, tolerance=0.1, weight_collection=ijf_weights_female.id))
+
+session.add_all(weights)
 session.commit()
 
 # make groups
 groups = []
-_groups = [[w_female, u18, female],
-           [w_female, adults, female],
-           [w_male, adults, male],
-           [w_male, adults30, male]]
+_groups = [[u18,      female, ijf_weights_female],
+           [adults,   female, ijf_weights_female],
+           [adults,   male,   ijf_weights_male],
+           [adults30, male,   ijf_weights_male]]
 
-for weight_classes, age, gender in _groups:
-    for weight in weight_classes:
-        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id))
+for age, gender, weight_collection in _groups:
+    print(age, gender, weight_collection)
+    for weight_cat_id in weight_collection.weights:
+        # HERE IS AN ERROR, no weights within weight_collection ??? 
+        groups.append(Group(age=age.id, weight=weight_cat_id, gender=gender.id))
+        print(groups)
 
 session.add_all(groups)
 
