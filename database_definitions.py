@@ -7,9 +7,13 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 engine = create_engine("sqlite:///configuration.db", echo=True)
 Base = declarative_base()
 
-association_gc = Table('association', Base.metadata,
-    Column('group', Integer, ForeignKey('groups.id')),
-    Column('competitor', Integer, ForeignKey('competitors.id')))
+class GroupCompetitorAssociation(Base):
+    __tablename__ = "group_competitor_associations"
+    left_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
+    right_id = Column(Integer, ForeignKey('competitors.id'), primary_key=True)
+    local_lot = Column(Integer)
+    group = relationship("Group", back_populates="competitors")
+    competitor = relationship("Competitor", back_populates="groups")
 
 class Club(Base):
     __tablename__ = "clubs"
@@ -29,7 +33,7 @@ class Competitor(Base):
     year_of_birth = Column(Integer)
     nationality = Column(String)
 
-    groups = relationship("Group", secondary=association_gc, back_populates="competitors")
+    groups = relationship("GroupCompetitorAssociation", back_populates="competitor")
 
     def __repr__(self):
         return "<Competitor: {0} {1} ({2})>".format(self.firstname, self.name, self.club.name)
@@ -89,7 +93,7 @@ class Group(Base):
     age = Column(Integer, ForeignKey("age_categories.id"))
     mode = Column(Integer, ForeignKey("modes.id"))
 
-    competitors = relationship("Competitor", secondary=association_gc, back_populates="groups")
+    competitors = relationship("GroupCompetitorAssociation", back_populates="group")
     fights = relationship("Fight")
     results = relationship("Result")
 
@@ -100,12 +104,14 @@ class Fight(Base):
     __tablename__ = "fights"
     
     id = Column(Integer, primary_key=True)
+    local_id = Column(Integer)
     competitor_1 = Column(Integer, ForeignKey('competitors.id'))
     competitor_2 = Column(Integer, ForeignKey('competitors.id'))
     winner = Column(Integer, ForeignKey('competitors.id'))
     winner_points = Column(Integer)
     winner_subpoints = Column(Integer)
     group = Column(Integer, ForeignKey("groups.id"))
+
     
     def __repr__(self):
         return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
