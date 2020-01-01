@@ -31,6 +31,8 @@ class Competitor(Base):
     firstname = Column(String)
     club = Column(Integer, ForeignKey("clubs.id"))
     year_of_birth = Column(Integer)
+    gender = Column(Integer, ForeignKey("genders.id"))
+    weight = Column(Float)
     nationality = Column(String)
 
     groups = relationship("GroupCompetitorAssociation", back_populates="competitor")
@@ -39,7 +41,7 @@ class Competitor(Base):
         return "<Competitor: {0} {1} ({2})>".format(self.firstname, self.name, self.club.name)
 
 class Age(Base):
-    __tablename__ = "age_categories"
+    __tablename__ = "ages"
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -50,7 +52,7 @@ class Age(Base):
         return "<Age: {0}>".format(self.name)
 
 class Gender(Base):
-    __tablename__ = "gender_categories"
+    __tablename__ = "genders"
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -60,7 +62,7 @@ class Gender(Base):
         return "<Gender: {0}>".format(self.name)
     
 class Weight(Base):
-    __tablename__ = "weight_categories"
+    __tablename__ = "weights"
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -68,7 +70,6 @@ class Weight(Base):
     weight_max = Column(Float)
     tolerance = Column(Float)
     weight_collection = Column(Integer, ForeignKey("weight_collections.id"))
-    #weight_collection = relationship("WeightCollection", back_populates="weights")
 
     def __repr__(self):
         return "<Weight: {0}>".format(self.name)
@@ -93,18 +94,31 @@ class Mode(Base):
     competitors_max = Column(Integer)
     template = Column(String)
 
+    modes_collection = Column(Integer, ForeignKey("mode_collections.id"))
+
     def __repr__(self):
         return "<Mode: {0}>".format(self.name)
+
+class ModeCollection(Base):
+    __tablename__ = "mode_collections"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    modes = relationship("Mode")
+
+    def __repr__(self):
+        return "<WeightCollection: {0} ({1})>".format(self.name, "|".join([m.name for m in self.modes]))
 
 class Group(Base):
     __tablename__ = "groups"
     
     id = Column(Integer, primary_key=True)
-    weight = Column(Integer, ForeignKey("weight_categories.id"))
-    gender = Column(Integer, ForeignKey("gender_categories.id"))
-    age = Column(Integer, ForeignKey("age_categories.id"))
+    weight = Column(Integer, ForeignKey("weights.id"))
+    gender = Column(Integer, ForeignKey("genders.id"))
+    age = Column(Integer, ForeignKey("ages.id"))
     mode = Column(Integer, ForeignKey("modes.id"))
 
+    tournament = Column(Integer, ForeignKey("tournaments.id"))
     competitors = relationship("GroupCompetitorAssociation", back_populates="group")
     fights = relationship("Fight")
     results = relationship("Result")
@@ -123,7 +137,6 @@ class Fight(Base):
     winner_points = Column(Integer)
     winner_subpoints = Column(Integer)
     group = Column(Integer, ForeignKey("groups.id"))
-
     
     def __repr__(self):
         return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
@@ -135,7 +148,22 @@ class Result(Base):
     place = Column(Integer)
     fighter = Column(Integer, ForeignKey('competitors.id'))
     group = Column(Integer, ForeignKey("groups.id"))
+
+class Tournament(Base):
+    __tablename__ = "tournaments"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    name_long = Column(String)
+    host = Column(String)
+    date = Column(String)
+    location = Column(String)
+    tatami_count = Column(Integer)
     
+    groups = relationship("Group")
+    mode_collection = Column(Integer, ForeignKey("mode_collections.id"))
+
+
 ### populate tables
 
 # create the table
@@ -181,6 +209,11 @@ weights.append(Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, toleranc
 session.add_all(weights)
 session.commit()
 
+# make tournament
+masters2020 = Tournament(name="Luftfahrt Masters", name_long="International Luftfahrt Masters 2020", location="Merlitzhalle", date="28th November 2020", host="SV Luftfahrt Berlin e.V.")
+session.add(masters2020)
+session.commit()
+
 # make groups
 groups = []
 _groups = [[u18,      female, ijf_weights_female],
@@ -192,7 +225,7 @@ for age, gender, weight_collection in _groups:
     print(age, gender, weight_collection)
     for weight in weight_collection.weights:
         # HERE IS AN ERROR, no weights within weight_collection ???
-        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id))
+        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id, tournament=masters2020.id))
 
 session.add_all(groups)
 
