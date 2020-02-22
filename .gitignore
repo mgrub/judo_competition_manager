@@ -1,2 +1,4 @@
 .vscode
 preparations
+__pycache__/
+configuration.db
