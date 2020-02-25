@@ -3,6 +3,10 @@ from sqlalchemy.orm import sessionmaker
 
 from database_definitions import *
 
+import random
+import string
+
+
 # define connectors
 engine = create_engine("sqlite:///configuration.db", echo=True)
 ### populate tables
@@ -51,6 +55,9 @@ session.add_all(weights)
 session.commit()
 
 mc = ModeCollection()
+session.add(mc)
+session.commit()
+
 mode_1 = Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=6, competitors_max=8, mode_collection=mc.id)
 session.add(mode_1)
 session.commit()
@@ -73,5 +80,39 @@ for age, gender, weight_collection in _groups:
         groups.append(Group(age=age.id, weight=weight.id, gender=gender.id, tournament=masters2020.id))
 
 session.add_all(groups)
-
 session.commit()
+
+def random_string(length, charset = string.ascii_uppercase):
+    return ''.join(random.choices(charset, k=length))
+
+# generate some random clubs
+clubs = []
+for n in range(10):
+    clubname = random_string(9)
+    clubs.append(Club(name=clubname))
+session.add_all(clubs)
+session.commit()
+
+# generate some random fighters
+competitors = []
+for n in range(200):
+    name = random_string(6)
+    firstname = random_string(3)
+    club = random.choice(clubs)
+    competitors.append(Competitor(name=name, firstname=firstname, club=club.id))
+session.add_all(competitors)
+session.commit()
+
+# add those fighters to random groups
+for c in competitors:
+    print(c)
+    g = random.choice(groups)
+    c.groups.append(g)
+    print(c.groups)
+session.commit()
+
+
+# draw and mode assignment
+g = groups[0]
+g.set_mode(mc.modes)
+g.mode_class.init_fights()
