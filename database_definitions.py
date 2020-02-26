@@ -7,11 +7,14 @@ Base = declarative_base()
 
 class GroupCompetitorAssociation(Base):
     __tablename__ = "group_competitor_associations"
+    
     group_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
-    competitor_id = Column(Integer, ForeignKey('competitors.id'), primary_key=True)
-    local_lot = Column(Integer)
     group = relationship("Group", back_populates="competitors")
+    
+    competitor_id = Column(Integer, ForeignKey('competitors.id'), primary_key=True)
     competitor = relationship("Competitor", back_populates="groups")
+
+    local_lot = Column(Integer)
 
 class Club(Base):
     __tablename__ = "clubs"
@@ -27,9 +30,15 @@ class Competitor(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     firstname = Column(String)
-    club = Column(Integer, ForeignKey("clubs.id"))
+
+    club_id = Column(Integer, ForeignKey("clubs.id"))
+    club = relationship("Club")
+
     year_of_birth = Column(Integer)
-    gender = Column(Integer, ForeignKey("genders.id"))
+    
+    gender_id = Column(Integer, ForeignKey("genders.id"))
+    gender = relationship("Gender")
+
     weight = Column(Float)
     nationality = Column(String)
     comment = Column(String)
@@ -112,25 +121,35 @@ class Group(Base):
     __tablename__ = "groups"
     
     id = Column(Integer, primary_key=True)
-    weight = Column(Integer, ForeignKey("weights.id"))
-    gender = Column(Integer, ForeignKey("genders.id"))
-    age = Column(Integer, ForeignKey("ages.id"))
-    mode = Column(Integer, ForeignKey("modes.id"))
 
-    tournament = Column(Integer, ForeignKey("tournaments.id"))
+    weight_id = Column(Integer, ForeignKey("weights.id"))
+    weight = relationship("Weight")
+
+    gender_id = Column(Integer, ForeignKey("genders.id"))
+    gender = relationship("Gender")
+    
+    age_id = Column(Integer, ForeignKey("ages.id"))
+    age = relationship("Age")
+    
+    mode_id = Column(Integer, ForeignKey("modes.id"))
+    mode = relationship("Mode")
+
+    tournament_id = Column(Integer, ForeignKey("tournaments.id"))
+    tournament = relationship("Tournament")
+
     competitors = relationship("GroupCompetitorAssociation", back_populates="group")
     fights = relationship("Fight")
     results = relationship("Result")
 
     def __repr__(self):
-        return "<Group {0}: {1} {2} {3}>".format(self.id, self.gender.name, self.age.name, self.weight.name, self.mode.name)
+        return "<Group {0}: {1} {2} {3} {4}>".format(self.id, self.gender, self.age, self.weight, self.mode)
 
     def set_mode(self, mode_collection):
         n_comp = len(self.competitors)
         for mode in mode_collection:
             if mode.competitors_min <= n_comp and n_comp <= mode.competitors_max:
                 module = importlib.import_module("modes")
-                self.mode_class = getattr(module, mode)()
+                self.mode_class = getattr(module, mode.name)()
 
 class Fight(Base):
     __tablename__ = "fights"
@@ -142,7 +161,8 @@ class Fight(Base):
     winner = Column(Integer, ForeignKey('competitors.id'))
     winner_points = Column(Integer)
     winner_subpoints = Column(Integer)
-    group = Column(Integer, ForeignKey("groups.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    group = relationship("Group")
     
     def __repr__(self):
         return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
