@@ -8,7 +8,7 @@ import string
 
 
 # define connectors
-engine = create_engine("sqlite:///configuration.db", echo=True)
+engine = create_engine("sqlite:///configuration.db", echo=False)
 ### populate tables
 
 # create the table
@@ -58,8 +58,12 @@ mc = ModeCollection()
 session.add(mc)
 session.commit()
 
-mode_1 = Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=6, competitors_max=8, mode_collection=mc.id)
-session.add(mode_1)
+modes = []
+modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=1, competitors_max=1, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=2, competitors_max=4, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=5, competitors_max=8, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=9, competitors_max=16, mode_collection=mc.id))
+session.add_all(modes)
 session.commit()
 
 # make tournament
@@ -77,7 +81,7 @@ _groups = [[u18,      female, ijf_weights_female],
 for age, gender, weight_collection in _groups:
     print(age, gender, weight_collection)
     for weight in weight_collection.weights:
-        groups.append(Group(age=age.id, weight=weight.id, gender=gender.id, tournament=masters2020.id))
+        groups.append(Group(age=age, weight=weight, gender=gender, tournament=masters2020))
 
 session.add_all(groups)
 session.commit()
@@ -99,20 +103,19 @@ for n in range(200):
     name = random_string(6)
     firstname = random_string(3)
     club = random.choice(clubs)
-    competitors.append(Competitor(name=name, firstname=firstname, club=club.id))
+    competitors.append(Competitor(name=name, firstname=firstname, club=club))
 session.add_all(competitors)
 session.commit()
 
 # add those fighters to random groups
 for c in competitors:
-    print(c)
     g = random.choice(groups)
-    c.groups.append(g)
-    print(c.groups)
+    gcr = GroupCompetitorAssociation(group=g, competitor=c)
+    c.groups.append(gcr)
 session.commit()
 
 
 # draw and mode assignment
-g = groups[0]
-g.set_mode(mc.modes)
-g.mode_class.init_fights()
+for g in groups:
+    g.set_mode(mc.modes)
+    g.mode_class.init_fights(g, session)
