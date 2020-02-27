@@ -114,7 +114,13 @@ for c in competitors:
     c.groups.append(gcr)
 session.commit()
 
-
 # draw and mode assignment
 for g in groups:
     g.set_mode(mc, session)
+    g.mode_class.init_fights()
+
+    if g.id % 4 == 0:
+        g.mode_class.delete_fights()
+    elif g.id % 4 == 1: 
+        g.mode_class.set_winner(0, 1, 1, 10)
+    
