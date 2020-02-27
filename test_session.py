@@ -117,5 +117,4 @@ session.commit()
 
 # draw and mode assignment
 for g in groups:
-    g.set_mode(mc.modes)
-    g.mode_class.init_fights(g, session)
+    g.set_mode(mc, session)

@@ -144,12 +144,12 @@ class Group(Base):
     def __repr__(self):
         return "<Group {0}: {1} {2} {3} {4}>".format(self.id, self.gender, self.age, self.weight, self.mode)
 
-    def set_mode(self, mode_collection):
+    def set_mode(self, mode_collection, session):
         n_comp = len(self.competitors)
-        for mode in mode_collection:
+        for mode in mode_collection.modes:
             if mode.competitors_min <= n_comp and n_comp <= mode.competitors_max:
                 module = importlib.import_module("modes")
-                self.mode_class = getattr(module, mode.name)()
+                self.mode_class = getattr(module, mode.name)(session, self)
 
 class Fight(Base):
     __tablename__ = "fights"
