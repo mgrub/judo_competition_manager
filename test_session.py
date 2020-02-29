@@ -59,10 +59,10 @@ session.add(mc)
 session.commit()
 
 modes = []
-modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=1, competitors_max=1, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=2, competitors_max=4, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=5, competitors_max=8, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage", name_long="KO Full Repechage", competitors_min=9, competitors_max=16, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=1, competitors_max=1, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=2, competitors_max=4, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=5, competitors_max=8, mode_collection=mc.id))
+modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=9, competitors_max=16, mode_collection=mc.id))
 session.add_all(modes)
 session.commit()
 
