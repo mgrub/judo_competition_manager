@@ -1,5 +1,6 @@
 from database_definitions import Fight, Competitor, GroupCompetitorAssociation
 from sqlalchemy import and_
+import random
 
 class ModeTemplate():
 
@@ -21,8 +22,20 @@ class ModeTemplate():
         self.delete_fights()
         self.init_fights()
 
-    def draw_lots(self):
-        pass
+    def draw_lots(self, manual_draw=None):
+
+        if manual_draw:
+            draw = manual_draw
+        else:
+            k = self.get_number_of_competitors()
+            draw = random.sample(range(k), k)
+        
+        gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group)).all()
+
+        for entry, local_lot in zip(gca, draw):
+            entry.local_lot = local_lot
+        
+        self.session.commit()
 
     def set_winner(self, local_fight_id, local_competitor_id, points, subpoints):
 
@@ -52,8 +65,9 @@ class ModeTemplate():
         gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==local_competitor_id)).first()
         return gca.competitor
 
-    # functions that need to be implemented by the specific modes
-    def propagate_fight_outcome(self, local_fight_id):
+    def get_number_of_competitors(self):
+        return len(self.group.competitors)
+
         raise NotImplementedError()
 
     def _fights(self):
