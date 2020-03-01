@@ -5,121 +5,131 @@ from database_definitions import *
 
 import random
 import string
+import os
 
+def load_or_create_database(db_name="configuration.db"):
 
-# define connectors
-engine = create_engine("sqlite:///configuration.db", echo=False)
-### populate tables
+    db_already_existing = os.path.exists(db_name)
 
-# create the table
-Base.metadata.create_all(engine)
+    # define connectors
+    engine = create_engine("sqlite:///configuration.db", echo=False)
+    Base.metadata.create_all(engine)
 
-# create session
-Session = sessionmaker(bind=engine)
-session = Session()
+    # create session
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-# add and update objects
-male = Gender(name="m", name_long="male")
-female = Gender(name="f", name_long="female")
+    if db_already_existing:
+        groups = session.query(Group).all()
 
-u18 = Age(name="u18", age_min=14, age_max=17)
-adults = Age(name="open", age_min=16, age_max=None)
-adults30 = Age(name="+30", age_min=30, age_max=None)
+    else:  # populate tables
+        # add and update objects
+        male = Gender(name="m", name_long="male")
+        female = Gender(name="f", name_long="female")
 
-ijf_weights_male = WeightCollection(name="IJF male")
-ijf_weights_female = WeightCollection(name="IJF female")
+        u18 = Age(name="u18", age_min=14, age_max=17)
+        adults = Age(name="open", age_min=16, age_max=None)
+        adults30 = Age(name="+30", age_min=30, age_max=None)
 
-session.add_all([male, female])
-session.add_all([u18, adults, adults30])
-session.add_all([ijf_weights_male, ijf_weights_female])
-session.commit()
+        ijf_weights_male = WeightCollection(name="IJF male")
+        ijf_weights_female = WeightCollection(name="IJF female")
 
-weights = []
-weights.append(Weight(name="- 60 kg",  weight_min=None,  weight_max=60.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="- 66 kg",  weight_min=60.0,  weight_max=66.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="- 73 kg",  weight_min=66.0,  weight_max=73.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="- 81 kg",  weight_min=73.0,  weight_max=81.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="- 90 kg",  weight_min=81.0,  weight_max=90.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="- 100 kg", weight_min=90.0,  weight_max=100.0, tolerance=0.1, weight_collection=ijf_weights_male.id))
-weights.append(Weight(name="+ 100 kg", weight_min=100.0, weight_max=None,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        session.add_all([male, female])
+        session.add_all([u18, adults, adults30])
+        session.add_all([ijf_weights_male, ijf_weights_female])
+        session.commit()
 
-weights.append(Weight(name="- 48 kg", weight_min=None, weight_max=48.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="- 52 kg", weight_min=48.0, weight_max=52.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="- 57 kg", weight_min=52.0, weight_max=57.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="- 63 kg", weight_min=57.0, weight_max=63.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="- 70 kg", weight_min=63.0, weight_max=70.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="- 78 kg", weight_min=70.0, weight_max=78.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
-weights.append(Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights = []
+        weights.append(Weight(name="- 60 kg",  weight_min=None,  weight_max=60.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="- 66 kg",  weight_min=60.0,  weight_max=66.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="- 73 kg",  weight_min=66.0,  weight_max=73.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="- 81 kg",  weight_min=73.0,  weight_max=81.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="- 90 kg",  weight_min=81.0,  weight_max=90.0,  tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="- 100 kg", weight_min=90.0,  weight_max=100.0, tolerance=0.1, weight_collection=ijf_weights_male.id))
+        weights.append(Weight(name="+ 100 kg", weight_min=100.0, weight_max=None,  tolerance=0.1, weight_collection=ijf_weights_male.id))
 
-session.add_all(weights)
-session.commit()
+        weights.append(Weight(name="- 48 kg", weight_min=None, weight_max=48.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="- 52 kg", weight_min=48.0, weight_max=52.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="- 57 kg", weight_min=52.0, weight_max=57.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="- 63 kg", weight_min=57.0, weight_max=63.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="- 70 kg", weight_min=63.0, weight_max=70.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="- 78 kg", weight_min=70.0, weight_max=78.0, tolerance=0.1, weight_collection=ijf_weights_female.id))
+        weights.append(Weight(name="+ 78 kg", weight_min=78.0, weight_max=None, tolerance=0.1, weight_collection=ijf_weights_female.id))
 
-mc = ModeCollection()
-session.add(mc)
-session.commit()
+        session.add_all(weights)
+        session.commit()
 
-modes = []
-modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=1, competitors_max=1, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=2, competitors_max=4, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=5, competitors_max=8, mode_collection=mc.id))
-modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=9, competitors_max=16, mode_collection=mc.id))
-session.add_all(modes)
-session.commit()
+        mc = ModeCollection()
+        session.add(mc)
+        session.commit()
 
-# make tournament
-masters2020 = Tournament(name="Luftfahrt Masters", name_long="International Luftfahrt Masters 2020", location="Merlitzhalle", date="28th November 2020", host="SV Luftfahrt Berlin e.V.")
-session.add(masters2020)
-session.commit()
+        modes = []
+        modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=1, competitors_max=1, mode_collection=mc.id))
+        modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=2, competitors_max=4, mode_collection=mc.id))
+        modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=5, competitors_max=8, mode_collection=mc.id))
+        modes.append(Mode(name="ko_full_repechage_8", name_long="KO Full Repechage", competitors_min=9, competitors_max=16, mode_collection=mc.id))
+        session.add_all(modes)
+        session.commit()
 
-# make groups
-groups = []
-_groups = [[u18,      female, ijf_weights_female],
-           [adults,   female, ijf_weights_female],
-           [adults,   male,   ijf_weights_male],
-           [adults30, male,   ijf_weights_male]]
+        # make tournament
+        masters2020 = Tournament(name="Luftfahrt Masters", name_long="International Luftfahrt Masters 2020", location="Merlitzhalle", date="28th November 2020", host="SV Luftfahrt Berlin e.V.")
+        session.add(masters2020)
+        session.commit()
 
-for age, gender, weight_collection in _groups:
-    print(age, gender, weight_collection)
-    for weight in weight_collection.weights:
-        groups.append(Group(age=age, weight=weight, gender=gender, tournament=masters2020))
+        # make groups
+        groups = []
+        _groups = [[u18,      female, ijf_weights_female],
+                [adults,   female, ijf_weights_female],
+                [adults,   male,   ijf_weights_male],
+                [adults30, male,   ijf_weights_male]]
 
-session.add_all(groups)
-session.commit()
+        for age, gender, weight_collection in _groups:
+            print(age, gender, weight_collection)
+            for weight in weight_collection.weights:
+                groups.append(Group(age=age, weight=weight, gender=gender, tournament=masters2020))
 
-def random_string(length, charset = string.ascii_uppercase):
-    return ''.join(random.choices(charset, k=length))
+        session.add_all(groups)
+        session.commit()
 
-# generate some random clubs
-clubs = []
-for n in range(10):
-    clubname = random_string(9)
-    clubs.append(Club(name=clubname))
-session.add_all(clubs)
-session.commit()
+        def random_string(length, charset = string.ascii_uppercase):
+            return ''.join(random.choices(charset, k=length))
 
-# generate some random fighters
-competitors = []
-for n in range(200):
-    name = random_string(6)
-    firstname = random_string(3)
-    club = random.choice(clubs)
-    competitors.append(Competitor(name=name, firstname=firstname, club=club))
-session.add_all(competitors)
-session.commit()
+        # generate some random clubs
+        clubs = []
+        for n in range(10):
+            clubname = random_string(9)
+            clubs.append(Club(name=clubname))
+        session.add_all(clubs)
+        session.commit()
 
-# add those fighters to random groups
-for c in competitors:
-    g = random.choice(groups)
-    gcr = GroupCompetitorAssociation(group=g, competitor=c)
-    c.groups.append(gcr)
-session.commit()
+        # generate some random fighters
+        competitors = []
+        for n in range(200):
+            name = random_string(6)
+            firstname = random_string(3)
+            club = random.choice(clubs)
+            competitors.append(Competitor(name=name, firstname=firstname, club=club))
+        session.add_all(competitors)
+        session.commit()
 
-# draw and mode assignment
-for g in groups:
-    g.set_mode(mc, session)
-    g.mode_class.draw_lots()
-    g.mode_class.init_fights()
+        # add those fighters to random groups
+        for c in competitors:
+            g = random.choice(groups)
+            gcr = GroupCompetitorAssociation(group=g, competitor=c)
+            c.groups.append(gcr)
+        session.commit()
 
+        # draw and mode assignment
+        for g in groups:
+            g.set_mode(mc, session)
+            g.mode_class.draw_lots()
+            g.mode_class.init_fights()
+
+    return session, groups
+
+session, groups = load_or_create_database()
+
+print(groups)
     #if g.id % 4 == 0:
     #    g.mode_class.delete_fights()
     #elif g.id % 4 == 1: 
