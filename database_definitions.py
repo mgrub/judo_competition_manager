@@ -156,14 +156,21 @@ class Fight(Base):
     
     id = Column(Integer, primary_key=True)
     local_id = Column(Integer)
-    competitor_1 = Column(Integer, ForeignKey('competitors.id'))
-    competitor_2 = Column(Integer, ForeignKey('competitors.id'))
-    winner = Column(Integer, ForeignKey('competitors.id'))
+
+    competitor_1_id = Column(Integer, ForeignKey('competitors.id'))
+    competitor_1 = relationship("Competitor", foreign_keys=[competitor_1_id])
+
+    competitor_2_id = Column(Integer, ForeignKey('competitors.id'))
+    competitor_2 = relationship("Competitor", foreign_keys=[competitor_2_id])
+
+    winner_id = Column(Integer, ForeignKey('competitors.id'))
+    winner = relationship("Competitor", foreign_keys=[winner_id])
+
     winner_points = Column(Integer)
     winner_subpoints = Column(Integer)
     group_id = Column(Integer, ForeignKey("groups.id"))
     group = relationship("Group")
-    
+
     def __repr__(self):
         return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
     
