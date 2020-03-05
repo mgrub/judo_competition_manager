@@ -175,13 +175,13 @@ class Fight(Base):
 
     def __repr__(self):
         return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
-    
+
 class Result(Base):
     __tablename__ = "results"
     
     id = Column(Integer, primary_key=True)
     place = Column(Integer)
-    fighter = Column(Integer, ForeignKey('competitors.id'))
+    competitor = Column(Integer, ForeignKey('competitors.id'))
     group = Column(Integer, ForeignKey("groups.id"))
 
 class Tournament(Base):

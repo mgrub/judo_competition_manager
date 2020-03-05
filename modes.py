@@ -97,13 +97,38 @@ class ModeTemplate():
     def evaluate_group_result(self):
         raise NotImplementedError()
 
+class PoolModeTemplate(ModeTemplate):
+
+    def get_total_number_of_fights(self):
+        return len(self.initial_known_fights)
+
+    def propagate_fight_outcome(self, local_fight_id):
+        pass
+    
+    def evaluate_group_result(self):
+        pass
+
+class pool_5(PoolModeTemplate):
+
+    initial_known_fights = {
+        0 : (3, 4),
+        1 : (0, 1),
+        2 : (2, 3),
+        3 : (4, 0),
+        4 : (1, 2),
+        5 : (3, 0),
+        6 : (2, 4),
+        7 : (1, 3),
+        8 : (0, 2),
+        9 : (4, 1),
+    }
 
 class KoModeTemplate(ModeTemplate):
 
     # dictionaries defining the different possible K.O. modes
     # need to be set
     fight_topology = {}  # {local_fight_id : (winner_next_fight , loser_next_fight)}   and   winner_next_fight = (<local_id>, <as_competitor>)
-    fight_evaluation = {}  # {local_fight_id : winner_has_place}
+    fight_evaluation = {}  # {local_fight_id : (winner_has_place, loser_has_place)}
     
     def get_total_number_of_fights(self):
         return len(self.fight_topology)
@@ -143,7 +168,6 @@ class KoModeTemplate(ModeTemplate):
     def evaluate_group_result(self):
         pass
 
-
 class ko_full_repechage_8(KoModeTemplate):
 
     fight_topology = {
@@ -172,6 +196,11 @@ class ko_full_repechage_8(KoModeTemplate):
         3: (6, 7),
     }
 
+    fight_evaluation = {
+        8  : (3, 5), 
+        9  : (3, 5),
+        10 : (1, 2),
+    }
 
 class ko_full_repechage_16(KoModeTemplate):
 
@@ -221,4 +250,10 @@ class ko_full_repechage_16(KoModeTemplate):
         5: (10, 11),
         6: (12, 13),
         7: (14, 15),
+    }
+
+    fight_evaluation = {
+        24 : (3, 5), 
+        25 : (3, 5),
+        26 : (1, 2),
     }
