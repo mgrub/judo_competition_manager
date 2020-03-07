@@ -148,10 +148,12 @@ class Group(Base):
         n_comp = len(self.competitors)
         for mode in mode_collection.modes:
             if mode.competitors_min <= n_comp and n_comp <= mode.competitors_max:
-                module = importlib.import_module("modes")
-                self.mode_class = getattr(module, mode.name)(session, self)
                 self.mode = mode
                 session.commit()
+    
+    def load_mode_class(self, mode, session):
+        module = importlib.import_module("modes")
+        self.mode_class = getattr(module, mode.name)(session, self)
 
 class Fight(Base):
     __tablename__ = "fights"

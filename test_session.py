@@ -22,6 +22,9 @@ def load_or_create_database(db_name="configuration.db"):
     if db_already_existing:
         groups = session.query(Group).all()
 
+        for g in groups:
+            g.load_mode_class(g.mode, session)
+
     else:  # populate tables
         # add and update objects
         male = Gender(name="m", name_long="male")
@@ -121,6 +124,7 @@ def load_or_create_database(db_name="configuration.db"):
         # draw and mode assignment
         for g in groups:
             g.set_mode(mc, session)
+            g.load_mode_class(g.mode, session)
             g.mode_class.draw_lots()
             g.mode_class.init_fights()
 
@@ -129,8 +133,10 @@ def load_or_create_database(db_name="configuration.db"):
 session, groups = load_or_create_database()
 
 print(groups)
-    #if g.id % 4 == 0:
-    #    g.mode_class.delete_fights()
-    #elif g.id % 4 == 1: 
-    #    g.mode_class.set_winner(0, 1, 1, 10)
+exit()
+for g in groups:
+    if g.id % 4 == 0:
+        g.mode_class.delete_fights()
+    elif g.id % 4 == 1: 
+        g.mode_class.set_winner(0, 1, 1, 10)
     
