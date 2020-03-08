@@ -145,14 +145,13 @@ class PoolModeTemplate(ModeTemplate):
 
             competitor_scores[gca.competitor] = (points, subpoints)
 
-        # sort by (points, subpoints) and get unique list entries
+        # sort by (points, subpoints)
         # competitors with same (total_points, total_subpoints) should have the same place
-        scores_unique = list(set(competitor_scores.values()))
-        scores_unique_sorted = sorted(scores_unique, key= lambda x: (x[0], x[1]), reverse=True)
+        scores_sorted = sorted(competitor_scores.values(), key= lambda x: (x[0], x[1]), reverse=True)
 
-        # 
+        # assign every competitor a place (by the position in the sorted unique scores)
         for competitor, score in competitor_scores.items():
-            place = scores_unique_sorted.index(score) + 1
+            place = scores_sorted.index(score) + 1
             result = Result(competitor=competitor, place=place, group=self.group)
             self.session.add(result)
 
