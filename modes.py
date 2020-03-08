@@ -1,5 +1,5 @@
-from database_definitions import Fight, Competitor, GroupCompetitorAssociation
-from sqlalchemy import and_
+from database_definitions import Fight, Competitor, GroupCompetitorAssociation, Result
+from sqlalchemy import and_, func
 import random
 
 class ModeTemplate():
@@ -33,6 +33,11 @@ class ModeTemplate():
     def delete_fights(self):
         for fight in self.group.fights:
             self.session.delete(fight)
+        self.session.commit()
+
+    def delete_results(self):
+        for result in self.group.results:
+            self.session.delete(result)
         self.session.commit()
 
     def reset_fights(self):
@@ -78,6 +83,17 @@ class ModeTemplate():
     def get_fight_from(self, local_fight_id):
         return self.session.query(Fight).filter(and_(Fight.group==self.group, Fight.local_id==local_fight_id)).first()
 
+    def get_winner_of(self, fight):
+        return fight.winner
+    
+    def get_loser_of(self, fight):
+        winner = fight.winner
+        if winner == fight.competitor_1:
+            loser = fight.competitor_2
+        else:
+            loser = fight.competitor_1
+        return loser
+
     def get_competitor_from(self, local_competitor_id):
         gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==local_competitor_id)).first()
         if gca == None:
@@ -103,10 +119,44 @@ class PoolModeTemplate(ModeTemplate):
         return len(self.initial_known_fights)
 
     def propagate_fight_outcome(self, local_fight_id):
+        # Because all fights are determined in advance there is no need for propagation of fight outcome.
+        # However to avoid the "NotImplementedError" it is necessary to create an empty function.
         pass
     
     def evaluate_group_result(self):
-        pass
+        self.delete_results()
+
+        # check total number of points+subpoints of every fighter 
+        competitor_scores = {}
+
+        for gca in self.group.competitors:
+            total_points = self.session.query(func.sum(Fight.winner_points)).filter(and_(Fight.group==self.group, Fight.winner==gca.competitor)).first()
+            total_subpoints = self.session.query(func.sum(Fight.winner_subpoints)).filter(and_(Fight.group==self.group, Fight.winner==gca.competitor)).first()
+
+            if total_points[0] == None:
+                points = 0
+            else:
+                points = total_points[0]
+
+            if total_subpoints[0] == None:
+                subpoints = 0
+            else:
+                subpoints = total_subpoints[0]
+
+            competitor_scores[gca.competitor] = (points, subpoints)
+
+        # sort by (points, subpoints) and get unique list entries
+        # competitors with same (total_points, total_subpoints) should have the same place
+        scores_unique = list(set(competitor_scores.values()))
+        scores_unique_sorted = sorted(scores_unique, key= lambda x: (x[0], x[1]), reverse=True)
+
+        # 
+        for competitor, score in competitor_scores.items():
+            place = scores_unique_sorted.index(score) + 1
+            result = Result(competitor=competitor, place=place, group=self.group)
+            self.session.add(result)
+
+        self.session.commit()
 
 class pool_5(PoolModeTemplate):
 
@@ -137,11 +187,8 @@ class KoModeTemplate(ModeTemplate):
         
         # get fight, winner and loser
         fight = self.get_fight_from(local_fight_id)
-        winner = fight.winner
-        if winner == fight.competitor_1:
-            loser = fight.competitor_2
-        else:
-            loser = fight.competitor_1
+        winner = self.get_winner_of(fight)
+        loser = self.get_loser_of(fight)
 
         # look up which fight comes next for winner and loser from dict
         next_fight_winner, next_fight_loser = self.fight_topology[local_fight_id]
@@ -166,7 +213,25 @@ class KoModeTemplate(ModeTemplate):
         self.session.commit()
     
     def evaluate_group_result(self):
-        pass
+        
+        # delete existing results
+        self.delete_results()
+
+        # get results from fight_evaluation-dictionary
+        for local_fight_id, (place_winner, place_loser)  in self.fight_evaluation.items():
+            # get fight, winner and loser
+            fight = self.get_fight_from(local_fight_id)
+            winner = self.get_winner_of(fight)
+            loser = self.get_loser_of(fight)
+
+            if isinstance(winner, Competitor) and place_winner:
+                result = Result(competitor=winner, place=place_winner, group=self.group)
+                self.session.add(result)
+
+            if isinstance(loser, Competitor) and place_loser:
+                result = Result(competitor=loser, place=place_loser, group=self.group)
+                self.session.add(result)
+        self.session.commit()
 
 class ko_full_repechage_8(KoModeTemplate):
 
