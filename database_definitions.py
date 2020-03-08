@@ -172,6 +172,7 @@ class Fight(Base):
 
     winner_points = Column(Integer)
     winner_subpoints = Column(Integer)
+
     group_id = Column(Integer, ForeignKey("groups.id"))
     group = relationship("Group")
 
@@ -183,8 +184,15 @@ class Result(Base):
     
     id = Column(Integer, primary_key=True)
     place = Column(Integer)
-    competitor = Column(Integer, ForeignKey('competitors.id'))
-    group = Column(Integer, ForeignKey("groups.id"))
+
+    competitor_id = Column(Integer, ForeignKey('competitors.id'))
+    competitor = relationship("Competitor")
+
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    group = relationship("Group")
+
+    def __repr__(self):
+        return "<Result('{0}' has place '{1}' in '{2}')>".format(self.competitor, self.place, self.group)
 
 class Tournament(Base):
     __tablename__ = "tournaments"
