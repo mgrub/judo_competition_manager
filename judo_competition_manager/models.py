@@ -1,9 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
-from sqlalchemy.ext.declarative import declarative_base
+from judo_competition_manager.database import Base
 import importlib
-
-Base = declarative_base()
 
 class GroupCompetitorAssociation(Base):
     __tablename__ = "group_competitor_associations"

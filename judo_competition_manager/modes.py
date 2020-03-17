@@ -1,4 +1,4 @@
-from models import Fight, Competitor, GroupCompetitorAssociation, Result
+from judo_competition_manager.models import Fight, Competitor, GroupCompetitorAssociation, Result
 from sqlalchemy import and_, func
 import random
 
