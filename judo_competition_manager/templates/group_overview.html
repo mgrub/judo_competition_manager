@@ -6,13 +6,27 @@
   <div>
       <h2>Competitors</h2>
         {% for gca in g.competitors %}
-            <p>{{ gca.competitor.__repr__() }}</p>
+          <p>{{ gca.competitor.__repr__() }}</p>
+        {% else %}
+          <p>No competitors found.</p>
         {% endfor %}
   </div>
   <div>
       <h2>Fights</h2>
         {% for fight in g.fights %}
-            <p>{{ fight.__repr__() }}</p>
+            <p>{{ fight.__repr__() }}
+              <select name="winner" method="GET" action="/">
+                {% for competitor in [fight.competitor_1, fight.competitor_2] %}
+                  {% if competitor == fight.winner %}
+                    <option value="{{competitor.id}}" SELECTED>{{ competitor }}</option>"
+                  {% else %}
+                    <option value="{{competitor.id}}">{{ competitor }}</option>"
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </p>
+        {% else %}
+          <p>No fights found.</p>
         {% endfor %}
   </div>
 {% endblock %}
