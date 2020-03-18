@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Group overview{% endblock %}
+
+{% block content %}
+  <h1>{{ g.__repr__() }}</h1>
+  <div>
+      <h2>Competitors</h2>
+        {% for gca in g.competitors %}
+            <p>{{ gca.competitor.__repr__() }}</p>
+        {% endfor %}
+  </div>
+  <div>
+      <h2>Fights</h2>
+        {% for fight in g.fights %}
+            <p>{{ fight.__repr__() }}</p>
+        {% endfor %}
+  </div>
+{% endblock %}

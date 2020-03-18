@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
+    <title>{% block title %}{% endblock %} - Judo Competition Manager</title>
+  </head>
+  <body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+      {% block footer %}
+      &copy; Copyright 2020 by <a href="https://github.com/mgrub/"> M. G.</a>.
+      {% endblock %}
+    </div>
+  </body>
+</html>
