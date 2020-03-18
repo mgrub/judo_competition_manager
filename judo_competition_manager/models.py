@@ -44,7 +44,7 @@ class Competitor(Base):
     groups = relationship("GroupCompetitorAssociation", back_populates="competitor")
 
     def __repr__(self):
-        return "<Competitor: {0} {1} ({2})>".format(self.firstname, self.name, self.club.name)
+        return "Competitor: {0} {1} ({2})".format(self.firstname, self.name, self.club.name)
 
 class Age(Base):
     __tablename__ = "ages"
@@ -55,7 +55,7 @@ class Age(Base):
     age_max = Column(Integer)
 
     def __repr__(self):
-        return "<Age: {0}>".format(self.name)
+        return "Age: {0}".format(self.name)
 
 class Gender(Base):
     __tablename__ = "genders"
@@ -65,7 +65,7 @@ class Gender(Base):
     name_long = Column(String)
 
     def __repr__(self):
-        return "<Gender: {0}>".format(self.name)
+        return "Gender: {0}".format(self.name)
     
 class Weight(Base):
     __tablename__ = "weights"
@@ -78,7 +78,7 @@ class Weight(Base):
     weight_collection = Column(Integer, ForeignKey("weight_collections.id"))
 
     def __repr__(self):
-        return "<Weight: {0}>".format(self.name)
+        return "Weight: {0}".format(self.name)
 
 class WeightCollection(Base):
     __tablename__ = "weight_collections"
@@ -88,7 +88,7 @@ class WeightCollection(Base):
     weights = relationship("Weight")
 
     def __repr__(self):
-        return "<WeightCollection: {0} ({1})>".format(self.name, "|".join([w.name for w in self.weights]))
+        return "WeightCollection: {0} ({1})".format(self.name, "|".join([w.name for w in self.weights]))
 
 class Mode(Base):
     __tablename__ = "modes"
@@ -103,7 +103,7 @@ class Mode(Base):
     mode_collection = Column(Integer, ForeignKey("mode_collections.id"))
 
     def __repr__(self):
-        return "<Mode: {0}>".format(self.name)
+        return "Mode: {0}".format(self.name)
 
 class ModeCollection(Base):
     __tablename__ = "mode_collections"
@@ -113,7 +113,7 @@ class ModeCollection(Base):
     modes = relationship("Mode")
 
     def __repr__(self):
-        return "<ModeCollection: {0} ({1})>".format(self.name, "|".join([m.name for m in self.modes]))
+        return "ModeCollection: {0} ({1})".format(self.name, "|".join([m.name for m in self.modes]))
 
 class Group(Base):
     __tablename__ = "groups"
@@ -140,7 +140,7 @@ class Group(Base):
     results = relationship("Result")
 
     def __repr__(self):
-        return "<Group {0}: {1} {2} {3} {4}>".format(self.id, self.gender, self.age, self.weight, self.mode)
+        return "Group {0}: {1} | {2} | {3} | {4}".format(self.id, self.gender, self.age, self.weight, self.mode)
 
     def set_mode(self, mode_collection, session):
         n_comp = len(self.competitors)
@@ -175,7 +175,7 @@ class Fight(Base):
     group = relationship("Group")
 
     def __repr__(self):
-        return "<Fight('{0}' vs. '{1}', winner: '{2}')>".format(self.competitor_1, self.competitor_2, self.winner)
+        return "Fight('{0}' vs. '{1}', winner: '{2}')".format(self.competitor_1, self.competitor_2, self.winner)
 
 class Result(Base):
     __tablename__ = "results"
@@ -190,7 +190,7 @@ class Result(Base):
     group = relationship("Group")
 
     def __repr__(self):
-        return "<Result('{0}' has place '{1}' in '{2}')>".format(self.competitor, self.place, self.group)
+        return "Result('{0}' has place '{1}' in '{2}')".format(self.competitor, self.place, self.group)
 
 class Tournament(Base):
     __tablename__ = "tournaments"
