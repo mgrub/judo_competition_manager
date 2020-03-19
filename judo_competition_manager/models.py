@@ -150,7 +150,7 @@ class Group(Base):
                 session.commit()
     
     def load_mode_class(self, mode, session):
-        module = importlib.import_module("modes")
+        module = importlib.import_module("judo_competition_manager.modes")
         self.mode_class = getattr(module, mode.name)(session, self)
 
 class Fight(Base):
