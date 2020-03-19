@@ -59,11 +59,11 @@ class ModeTemplate():
         
         self.session.commit()
 
-    def set_winner(self, local_fight_id, local_competitor_id, points, subpoints):
+    def set_winner(self, fight_id, competitor_id, points, subpoints, local_ids=True):
 
-        # resolve local ids
-        fight = self.get_fight_from(local_fight_id)
-        competitor = self.get_competitor_from(local_competitor_id)
+        # resolve local/global ids
+        fight = self.get_fight_from(fight_id, local_id=local_ids)
+        competitor = self.get_competitor_from(competitor_id, local_id=local_ids)
 
         # set winner
         fight.winner = competitor
@@ -80,8 +80,11 @@ class ModeTemplate():
             if fight.winner != None:
                 self.propagate_fight_outcome(fight.local_id)
 
-    def get_fight_from(self, local_fight_id):
-        return self.session.query(Fight).filter(and_(Fight.group==self.group, Fight.local_id==local_fight_id)).first()
+    def get_fight_from(self, fight_id, local_id=True):
+        if local_id:
+            return self.session.query(Fight).filter(and_(Fight.group==self.group, Fight.local_id==fight_id)).first()
+        else:
+            return self.session.query(Fight).filter(Fight.id==fight_id).first()
 
     def get_winner_of(self, fight):
         return fight.winner
@@ -94,12 +97,15 @@ class ModeTemplate():
             loser = fight.competitor_1
         return loser
 
-    def get_competitor_from(self, local_competitor_id):
-        gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==local_competitor_id)).first()
-        if gca == None:
-            return None
+    def get_competitor_from(self, competitor_id, local_id=True):
+        if local_id:
+            gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==local_competitor_id)).first()
+            if gca == None:
+                return None
+            else:
+                return gca.competitor
         else:
-            return gca.competitor
+            return self.session.query(Competitor).filter(Competitor.id==competitor_id).first()
 
     def get_number_of_competitors(self):
         return len(self.group.competitors)
