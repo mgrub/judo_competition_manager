@@ -1,0 +1,12 @@
+{{ fight.__repr__() }}
+<form method=post>
+    <select id={{ fight.id }} name="winner_select" onchange="fight_set_winner(this.id, this.value, 1, 10);fight_reload(this.id);">
+    {% for competitor in [None, fight.competitor_1, fight.competitor_2] %}
+        {% if competitor == fight.winner %}
+        <option value="{{ competitor.id }}" SELECTED>{{ competitor }}</option>"
+        {% else %}
+        <option value="{{ competitor.id }}">{{ competitor }}</option>"
+        {% endif %}
+    {% endfor %}
+    </select>
+</form>
