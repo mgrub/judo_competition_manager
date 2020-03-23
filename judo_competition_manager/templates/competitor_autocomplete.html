@@ -1,0 +1,3 @@
+{% for c in list_of_competitors %}
+    <option value="{{ c.id }}">{{ c.name + ', ' + c.firstname }}</option>
+{% endfor %}

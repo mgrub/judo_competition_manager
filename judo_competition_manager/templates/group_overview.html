@@ -5,20 +5,27 @@
 {% block content %}
   <h1>{{ g.__repr__() }}</h1>
   <div>
-      <h2>Competitors</h2>
-        {% for gca in g.competitors %}
-          <p>{{ gca.competitor.__repr__() }}</p>
-        {% else %}
-          <p>No competitors found.</p>
-        {% endfor %}
+    <h2>Competitors</h2>
+      {% for gca in g.competitors %}
+        <p>{{ gca.competitor.__repr__() }}</p>
+      {% else %}
+        <p>No competitors found.</p>
+      {% endfor %}
   </div>
+
   <div>
-      <h2>Fights</h2>
-        {% for fight in g.fights %}
-          <div id=fight_{{ fight.id }}></div>
-          <script>fight_reload({{ fight.id }})</script>
-        {% else %}
-          <p>No fights found.</p>
-        {% endfor %}
+    <h2>TESTING</h2>
+      <input id="competitor_select" list="competitor_selection" onkeyup="competitor_autocomplete(this.list.id, this.value)">
+      <datalist id="competitor_selection"></datalist>
+  </div>
+
+  <div>
+    <h2>Fights</h2>
+      {% for fight in g.fights %}
+        <div id=fight_{{ fight.id }}></div>
+        <script>fight_reload({{ fight.id }})</script>
+      {% else %}
+        <p>No fights found.</p>
+      {% endfor %}
   </div>
 {% endblock %}

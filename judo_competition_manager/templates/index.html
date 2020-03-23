@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Start{% endblock %}
+
+{% block content %}
+  <h2>Groups</h2>
+      {% for g in groups %}
+        <div>
+           <a href="{{ url_for('group_overview', group_id=g.id) }}">group {{ g.id }} with {{ g.competitors|length }} competitors</a>
+        </div>
+      {% else %}
+        <div>No groups found.</div>
+      {% endfor %}
+{% endblock %}
