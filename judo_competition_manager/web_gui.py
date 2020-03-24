@@ -39,18 +39,13 @@ def fight_set_winner(fight_id):
     
     return '', 204  # no page
 
-@app.route('/query', methods=["GET", "POST"])
+@app.route('/query', methods=["POST"])
 def query():
     matching_competitors = []
 
-    if request.method == "GET":
-        request_data = request.args
-    else:
-        request_data = request.form
-
-    if "competitors_matching" in request_data:
+    if "competitors_matching" in request.form:
         # match all names and firstnames starting with the request search term (ilike -> case insensitive)
-        search = request_data.get("competitors_matching") + "%"
+        search = request.form.get("competitors_matching") + "%"
         matches_by_name = Competitor.query.filter(Competitor.name.ilike(search)).limit(5).all()
         matches_by_firstname = Competitor.query.filter(Competitor.firstname.ilike(search)).limit(5).all()
 
