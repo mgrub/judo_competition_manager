@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.sql.expression import and_, or_
 
 # define connectors
 engine = create_engine("sqlite:///configuration.db", echo=False)
