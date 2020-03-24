@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Group overview{% endblock %}
-{% block scripts %}<script type="text/javascript" src="{{ url_for('static', filename='scripts.js') }}"></script>{% endblock %}
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='scripts.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='autocomplete.js') }}"></script>
+{% endblock %}
 
 {% block content %}
   <h1>{{ g.__repr__() }}</h1>
@@ -11,8 +14,15 @@
   <script>group_competitor_list({{ g.id }})</script>
 
   <p>Add new competitor by name:</p>
-  <input id="competitor_select" list="competitor_selection" onkeyup="competitor_autocomplete(this.list.id, this.value);">
-  <datalist id="competitor_selection"></datalist>
+  <form autocomplete="off">
+    <div class="autocomplete" style="width:300px;">
+      <input id="competitor_select" type="text" name="competitor_id">
+    </div>
+    <input label="Add" type="button" onclick="group_add_competitor({{ g.id }}, document.getElementById('competitor_select').value);group_competitor_list({{ g.id }});">
+  </form>
+  <script>autocomplete(document.getElementById("competitor_select"), get_matching_competitors);</script> 
+
+
 
   <div id="fight_list">
     <h2>Fights</h2>

@@ -44,14 +44,11 @@ function group_add_competitor(group_id, competitor_id){
     xhr.send("action=add&competitor_id=" + competitor_id.toString());
 }
 
-function competitor_autocomplete(list_id, search_text){
+function get_matching_competitors(search_text){
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById(list_id).innerHTML = this.responseText
-        }
-    };
-    xhr.open('POST', '/query');
+    xhr.open('POST', '/query', false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send("competitors_matching=" + search_text);
+
+    return JSON.parse(xhr.responseText)
 }

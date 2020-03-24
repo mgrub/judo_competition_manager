@@ -3,6 +3,8 @@ from flask import Flask, render_template, request
 from judo_competition_manager.models import Group, Fight, Competitor, GroupCompetitorAssociation
 from judo_competition_manager.database import init_db, db_session, and_
 
+import json
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -32,14 +34,12 @@ def group_overview(group_id):
                 if action == "remove" and gca != None:
                     db_session.delete(gca)
                     db_session.commit()
-                    print("123")
                 elif action == "add" and gca == None:
                     gca = GroupCompetitorAssociation(group=g, competitor=c)
-                    g.competitors.append(gca)
+                    db_session.add(gca)
                     db_session.commit()
             
             elif action == "list_competitors":
-                print("ABC")
                 return render_template("competitor_list.html", g=g)
 
         else:
@@ -82,7 +82,14 @@ def query():
 
         matching_competitors = matches_by_name + matches_by_firstname
 
-        return render_template("competitor_autocomplete.html", list_of_competitors=matching_competitors)
+        result = {}
+        for c in matches_by_name:
+            result[c.id] = (c.name, c.firstname, c.club.name, "name_match")
+
+        for c in matches_by_firstname:
+            result[c.id] = (c.name, c.firstname, c.club.name, "firstname_match")
+        
+        return json.dumps(result)
     else:
         return ""
 
