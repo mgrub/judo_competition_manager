@@ -1,9 +1,9 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
-from .database import Base
+from .database import Base, Serializer
 import importlib
 
-class GroupCompetitorAssociation(Base):
+class GroupCompetitorAssociation(Base, Serializer):
     __tablename__ = "group_competitor_associations"
     
     group_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
@@ -14,7 +14,7 @@ class GroupCompetitorAssociation(Base):
 
     local_lot = Column(Integer)
 
-class Club(Base):
+class Club(Base, Serializer):
     __tablename__ = "clubs"
     
     id = Column(Integer, primary_key=True)
@@ -22,7 +22,7 @@ class Club(Base):
     name_long = Column(String)
     country = Column(String)
 
-class Competitor(Base):
+class Competitor(Base, Serializer):
     __tablename__ = "competitors"
     
     id = Column(Integer, primary_key=True)
@@ -46,7 +46,7 @@ class Competitor(Base):
     def __repr__(self):
         return "Competitor: {0} {1} ({2})".format(self.firstname, self.name, self.club.name)
 
-class Age(Base):
+class Age(Base, Serializer):
     __tablename__ = "ages"
     
     id = Column(Integer, primary_key=True)
@@ -57,7 +57,7 @@ class Age(Base):
     def __repr__(self):
         return "Age: {0}".format(self.name)
 
-class Gender(Base):
+class Gender(Base, Serializer):
     __tablename__ = "genders"
     
     id = Column(Integer, primary_key=True)
@@ -67,7 +67,7 @@ class Gender(Base):
     def __repr__(self):
         return "Gender: {0}".format(self.name)
     
-class Weight(Base):
+class Weight(Base, Serializer):
     __tablename__ = "weights"
     
     id = Column(Integer, primary_key=True)
@@ -80,7 +80,7 @@ class Weight(Base):
     def __repr__(self):
         return "Weight: {0}".format(self.name)
 
-class WeightCollection(Base):
+class WeightCollection(Base, Serializer):
     __tablename__ = "weight_collections"
     
     id = Column(Integer, primary_key=True)
@@ -90,7 +90,7 @@ class WeightCollection(Base):
     def __repr__(self):
         return "WeightCollection: {0} ({1})".format(self.name, "|".join([w.name for w in self.weights]))
 
-class Mode(Base):
+class Mode(Base, Serializer):
     __tablename__ = "modes"
     
     id = Column(Integer, primary_key=True)
@@ -105,7 +105,7 @@ class Mode(Base):
     def __repr__(self):
         return "Mode: {0}".format(self.name)
 
-class ModeCollection(Base):
+class ModeCollection(Base, Serializer):
     __tablename__ = "mode_collections"
     
     id = Column(Integer, primary_key=True)
@@ -115,7 +115,7 @@ class ModeCollection(Base):
     def __repr__(self):
         return "ModeCollection: {0} ({1})".format(self.name, "|".join([m.name for m in self.modes]))
 
-class Group(Base):
+class Group(Base, Serializer):
     __tablename__ = "groups"
     
     id = Column(Integer, primary_key=True)
@@ -153,7 +153,7 @@ class Group(Base):
         module = importlib.import_module("judo_competition_manager.modes")
         self.mode_class = getattr(module, mode.name)(session, self)
 
-class Fight(Base):
+class Fight(Base, Serializer):
     __tablename__ = "fights"
     
     id = Column(Integer, primary_key=True)
@@ -177,7 +177,7 @@ class Fight(Base):
     def __repr__(self):
         return "Fight('{0}' vs. '{1}', winner: '{2}')".format(self.competitor_1, self.competitor_2, self.winner)
 
-class Result(Base):
+class Result(Base, Serializer):
     __tablename__ = "results"
     
     id = Column(Integer, primary_key=True)
@@ -192,7 +192,7 @@ class Result(Base):
     def __repr__(self):
         return "Result('{0}' has place '{1}' in '{2}')".format(self.competitor, self.place, self.group)
 
-class Tournament(Base):
+class Tournament(Base, Serializer):
     __tablename__ = "tournaments"
 
     id = Column(Integer, primary_key=True)
