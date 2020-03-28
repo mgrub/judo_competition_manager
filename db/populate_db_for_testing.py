@@ -1,8 +1,8 @@
 import sys
 sys.path.append(".")
 
-from judo_competition_manager.models import Gender, Age, WeightCollection, Weight, ModeCollection, Mode, Tournament, Group, Club, Competitor, GroupCompetitorAssociation
-from judo_competition_manager.database import init_db, db_session
+from .models import Gender, Age, WeightCollection, Weight, ModeCollection, Mode, Tournament, Group, Club, Competitor, GroupCompetitorAssociation
+from .database import init_db, db_session
 
 import random
 import string

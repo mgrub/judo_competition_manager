@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 
-from judo_competition_manager.models import Group, Fight, Competitor, GroupCompetitorAssociation
-from judo_competition_manager.database import init_db, db_session, and_
+from ..db.models import Group, Fight, Competitor, GroupCompetitorAssociation
+from ..db.database import init_db, db_session, and_
 
 import json
 

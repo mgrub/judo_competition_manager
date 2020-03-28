@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
-from judo_competition_manager.database import Base
+from .database import Base
 import importlib
 
 class GroupCompetitorAssociation(Base):
