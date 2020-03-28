@@ -38,6 +38,8 @@ function group_remove_competitor(group_id, competitor_id){
 }
 
 function group_add_competitor(group_id, competitor_id){
+
+    // TODO: check, if competitor_id is really an int, otherwise open a dialog to create to new competitor
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/group/' + group_id.toString(), false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");

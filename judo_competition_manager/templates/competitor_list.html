@@ -1,8 +1,0 @@
-{% for gca in g.competitors %}
-    <p>
-        {{ gca.competitor.__repr__() }}
-        <a href="javascript:;" onclick="group_remove_competitor({{ g.id }}, {{ gca.competitor.id }});group_competitor_list({{ g.id }});">[remove]</a>
-    </p>
-{% else %}
-    <p>No competitors found.</p>
-{% endfor %}

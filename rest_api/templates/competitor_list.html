@@ -1,0 +1,24 @@
+{% for gca in g.competitors %}
+    <p>
+        {{ gca.competitor.__repr__() }}
+        <a href="javascript:;" onclick="group_remove_competitor({{ g.id }}, {{ gca.competitor.id }});group_competitor_list({{ g.id }});">[remove]</a>
+
+        <div class="form-popup" id="competitor_{{ gca.competitor.id }}">
+        <form class="form-container">
+            <h1>Login</h1>
+
+            <input type="text" label="Name" placeholder="{{ gca.competitor.name }}" name="name" required>
+            <input type="text" label="Firstname" placeholder="{{ gca.competitor.firstname }}" name="firstname" required>
+            <input type="text" label="Year of Birth" placeholder="{{ gca.competitor.year_of_birth }}" name="year_of_birth">
+            <input type="text" label="Club ID" placeholder="{{ gca.competitor.club_id }}" name="club_id" required>
+            <input type="text" label="Gender ID" placeholder="{{ gca.competitor.gender_id }}" name="gender_id">
+
+            <button type="submit" class="btn">Change</button>
+            <button type="submit" class="btn cancel" onclick="closeForm()">Close</button>
+        </form>
+        </div> 
+        
+    </p>
+{% else %}
+    <p>No competitors found.</p>
+{% endfor %}

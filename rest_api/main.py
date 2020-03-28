@@ -70,17 +70,46 @@ def fight_set_winner(fight_id):
     
     return '', 204  # no page
 
+@app.route("/competitor/<int:competitor_id>", methods=["POST"])
+def competitor(competitor_id):
+
+    if "action" in request.form:
+        action = request.form.get("action")
+
+        if action == "add_new":
+            name = request.form.get("name")
+            firstname = request.form.get("firstname")
+            year_of_birth = request.form.get("year_of_birth")
+            club_id = request.form.get("club_id")
+            gender_id = request.form.get("gender_id")
+
+            c = Competitor(name=name, firstname=firstname, year_of_birth=year_of_birth, club_id=club_id, gender_id=gender_id)
+            db_session.add(c)
+            db_session.commit()
+
+        elif action == "change":
+            c = Competitor.query.filter(Competitor.id == competitor_id).first()
+
+            for key in request.form.keys():
+                val = request.form.get(key)
+                print(key, val)
+                if key in ["name", "firstname", "year_of_birth", "club_id", "gender_id"]:
+                    setattr(c, key, val)
+            
+            db_session.commit()
+
+
+
+
+
 @app.route('/query', methods=["POST"])
 def query():
-    matching_competitors = []
 
     if "competitors_matching" in request.form:
         # match all names and firstnames starting with the request search term (ilike -> case insensitive)
         search = request.form.get("competitors_matching") + "%"
         matches_by_name = Competitor.query.filter(Competitor.name.ilike(search)).limit(5).all()
         matches_by_firstname = Competitor.query.filter(Competitor.firstname.ilike(search)).limit(5).all()
-
-        matching_competitors = matches_by_name + matches_by_firstname
 
         result = {}
         for c in matches_by_name:
