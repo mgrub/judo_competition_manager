@@ -7,11 +7,6 @@ import json
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    groups = Group.query.all()
-    return render_template("index.html", groups=groups)
-
 @app.route('/group/<int:group_id>', methods=["GET", "POST"])
 def group_overview(group_id):
 
@@ -46,12 +41,6 @@ def group_overview(group_id):
             print("No valid/supported group action. Check your arguments")
 
         return '', 204  # no page
-
-@app.route('/fight/<int:fight_id>/dropdown')
-def fight_dropdown(fight_id):
-    f = Fight.query.filter(Fight.id == fight_id).first()
-
-    return render_template("fight_dropdown.html", fight=f)
 
 @app.route('/fight/<int:fight_id>/set_winner', methods=["POST"])
 def fight_set_winner(fight_id):
