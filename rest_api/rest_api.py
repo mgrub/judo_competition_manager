@@ -73,6 +73,7 @@ def define_change(cls):
 funcs = []
 for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, Mode, Result]:
     funcs.append(define_show(cls))
+    funcs.append(define_showall(cls))
     funcs.append(define_add(cls))
     funcs.append(define_remove(cls))
     funcs.append(define_change(cls))
@@ -113,23 +114,6 @@ def group_remove_competitor():
     else:
         print("No valid/supported group action. Check your arguments")
 
-    return '', 204  # no page
-
-@app.route('/api/fight/<int:fight_id>/set_winner', methods=["POST"])
-def fight_set_winner(fight_id):
-    
-    f = Fight.query.filter(Fight.id == fight_id).first()
-    g = f.group
-
-    # TODO: make consistency/plausability checks
-    winner_id = request.form.get("winner_id")
-    points = request.form.get("points")
-    subpoints = request.form.get("subpoints")
-
-    # set winner
-    g.load_mode_class(g.mode, db_session)
-    g.mode_class.set_winner(fight_id, winner_id, points, subpoints, local_ids=False)
-    
     return '', 204  # no page
 
 @app.route('/api/query', methods=["POST"])
