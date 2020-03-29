@@ -1,46 +1,106 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
-from ..db.models import Group, Fight, Competitor, GroupCompetitorAssociation
+from ..db.models import Tournament, Club, Competitor, Age, Gender, Weight
+from ..db.models import Group, Fight, GroupCompetitorAssociation, Mode, Result
 from ..db.database import init_db, db_session, and_
 
 import json
 
 app = Flask(__name__)
 
-@app.route('/group/<int:group_id>', methods=["GET", "POST"])
-def group_overview(group_id):
+# utility function to change the name of a function to something that is unique to flask
+def rename(newname):
+    def decorator(f):
+        f.__name__ = newname
+        return f
+    return decorator
 
-    g = Group.query.filter(Group.id == group_id).first()
+# define some common actions (show, add, remove, change)
+def define_show(cls):
+    @app.route("/api/" + cls.__name__.lower() + "/<int:cls_id>", methods=["GET"])
+    @rename(cls.__name__.lower() + "_show")
+    def func(cls_id):
+        member = cls.query.filter(cls.id == cls_id).first()
+        return jsonify(member.serialize())
+    return func
 
-    if request.method == "GET":
-        return render_template("group_overview.html", g=g)
+def define_add(cls):
+    @app.route("/api/" + cls.__name__.lower(), methods=["POST"])
+    @rename(cls.__name__.lower() + "_add")
+    def func():
+        props = {key: request.form.get(key) for key in request.form}
+        new_member = cls(*props)
+        db_session.add(new_member)
+    return func
+
+def define_remove(cls):
+    @app.route("/api/" + cls.__name__.lower() + "/<int:cls_id>", methods=["DELETE"])
+    @rename(cls.__name__.lower() + "_remove")
+    def func(cls_id):
+        member = cls.query.filter(cls.id == cls_id).first()
+        db_session.delete(member)
+        db_session.commit()
+    return func
+
+def define_change(cls):
+    @app.route("/api/" + cls.__name__.lower() + "/<int:cls_id>", methods=["PUT"])
+    @rename(cls.__name__.lower() + "_change")
+    def func(cls_id):
+        member = cls.query.filter(cls.id == cls_id).first()
+        props = {key: request.form.get(key) for key in request.form}
+        for key, val in props:
+            setattr(member, key, val)
+        db_session.commit()
+    return func
+
+# register these actions for most of the db-models
+funcs = []
+for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, GroupCompetitorAssociation, Mode, Result]:
+    funcs.append(define_show(cls))
+    funcs.append(define_add(cls))
+    funcs.append(define_remove(cls))
+    funcs.append(define_change(cls))
+
+# add some more specific actions 
+# ... TODO
+
+@app.route('/api/tournaments/<int:tournament_id>/groups', methods=["GET"])
+def show_tournamenet_groups(tournament_id):
+    # get all groups belonging to tournament and jsonify
+    groups = Group.query.filter(Group.tournament_id == tournament_id).all()
+    result = {"groups": [g.id for g in groups]}
+    return result
+
+## Competitor actions
+def add_competitor_to_group():
+    pass
+
+def remove_competitor_from_group():
+    if "action" in request.form:
+        action = request.form.get("action")
+
+        if "competitor_id" in request.form:
+            c_id = request.form.get("competitor_id")
+            c = Competitor.query.filter(Competitor.id == c_id).first()
+
+            # query the corresponing gca-object
+            gca = GroupCompetitorAssociation.query.filter(and_(GroupCompetitorAssociation.competitor == c, GroupCompetitorAssociation.group == g)).first()
+
+            if action == "remove" and gca != None:
+                db_session.delete(gca)
+                db_session.commit()
+            elif action == "add" and gca == None:
+                gca = GroupCompetitorAssociation(group=g, competitor=c)
+                db_session.add(gca)
+                db_session.commit()
+        
+        elif action == "list_competitors":
+            return render_template("competitor_list.html", g=g)
 
     else:
-        if "action" in request.form:
-            action = request.form.get("action")
+        print("No valid/supported group action. Check your arguments")
 
-            if "competitor_id" in request.form:
-                c_id = request.form.get("competitor_id")
-                c = Competitor.query.filter(Competitor.id == c_id).first()
-
-                # query the corresponing gca-object
-                gca = GroupCompetitorAssociation.query.filter(and_(GroupCompetitorAssociation.competitor == c, GroupCompetitorAssociation.group == g)).first()
-
-                if action == "remove" and gca != None:
-                    db_session.delete(gca)
-                    db_session.commit()
-                elif action == "add" and gca == None:
-                    gca = GroupCompetitorAssociation(group=g, competitor=c)
-                    db_session.add(gca)
-                    db_session.commit()
-            
-            elif action == "list_competitors":
-                return render_template("competitor_list.html", g=g)
-
-        else:
-            print("No valid/supported group action. Check your arguments")
-
-        return '', 204  # no page
+    return '', 204  # no page
 
 @app.route('/fight/<int:fight_id>/set_winner', methods=["POST"])
 def fight_set_winner(fight_id):
@@ -58,38 +118,6 @@ def fight_set_winner(fight_id):
     g.mode_class.set_winner(fight_id, winner_id, points, subpoints, local_ids=False)
     
     return '', 204  # no page
-
-@app.route("/competitor/<int:competitor_id>", methods=["POST"])
-def competitor(competitor_id):
-
-    if "action" in request.form:
-        action = request.form.get("action")
-
-        if action == "add_new":
-            name = request.form.get("name")
-            firstname = request.form.get("firstname")
-            year_of_birth = request.form.get("year_of_birth")
-            club_id = request.form.get("club_id")
-            gender_id = request.form.get("gender_id")
-
-            c = Competitor(name=name, firstname=firstname, year_of_birth=year_of_birth, club_id=club_id, gender_id=gender_id)
-            db_session.add(c)
-            db_session.commit()
-
-        elif action == "change":
-            c = Competitor.query.filter(Competitor.id == competitor_id).first()
-
-            for key in request.form.keys():
-                val = request.form.get(key)
-                print(key, val)
-                if key in ["name", "firstname", "year_of_birth", "club_id", "gender_id"]:
-                    setattr(c, key, val)
-            
-            db_session.commit()
-
-
-
-
 
 @app.route('/query', methods=["POST"])
 def query():
