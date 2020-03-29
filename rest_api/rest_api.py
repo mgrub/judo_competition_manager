@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template
+from flask import make_response, request, abort
+from flask import jsonify
 
 from ..db.models import Tournament, Club, Competitor, Age, Gender, Weight
 from ..db.models import Group, Fight, GroupCompetitorAssociation, Mode, Result
@@ -15,13 +17,26 @@ def rename(newname):
         return f
     return decorator
 
-# define some common actions (show, add, remove, change)
+# define some common actions (show, show_all, add, remove, change)
+def define_showall(cls):
+    @app.route("/api/" + cls.__name__.lower(), methods=["GET"])
+    @rename(cls.__name__.lower() + "_showall")
+    def func():
+        members = cls.query.all()
+        members_dict = {m.id: m.serialize() for m in members}
+        return jsonify({cls.__name__.lower() + 's': members_dict})
+    return func
+
 def define_show(cls):
     @app.route("/api/" + cls.__name__.lower() + "/<int:cls_id>", methods=["GET"])
     @rename(cls.__name__.lower() + "_show")
     def func(cls_id):
         member = cls.query.filter(cls.id == cls_id).first()
-        return jsonify(member.serialize())
+        try:
+            member_dict = member.serialize()
+            return jsonify(member_dict)
+        except AttributeError:
+            abort(404)
     return func
 
 def define_add(cls):
@@ -31,6 +46,7 @@ def define_add(cls):
         props = {key: request.form.get(key) for key in request.form}
         new_member = cls(*props)
         db_session.add(new_member)
+        db_session.commit()
     return func
 
 def define_remove(cls):
@@ -60,22 +76,23 @@ for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, Gro
     funcs.append(define_add(cls))
     funcs.append(define_remove(cls))
     funcs.append(define_change(cls))
+    if cls != GroupCompetitorAssociation:
+        funcs.append(define_showall(cls))
 
 # add some more specific actions 
 # ... TODO
 
-@app.route('/api/tournaments/<int:tournament_id>/groups', methods=["GET"])
-def show_tournamenet_groups(tournament_id):
+@app.route('/api/tournament/<int:tournament_id>/groups', methods=["GET"])
+def tournamenet_show_groups(tournament_id):
     # get all groups belonging to tournament and jsonify
     groups = Group.query.filter(Group.tournament_id == tournament_id).all()
     result = {"groups": [g.id for g in groups]}
-    return result
+    return jsonify(result)
 
-## Competitor actions
-def add_competitor_to_group():
+def group_add_competitor():
     pass
 
-def remove_competitor_from_group():
+def group_remove_competitor():
     if "action" in request.form:
         action = request.form.get("action")
 
@@ -102,7 +119,7 @@ def remove_competitor_from_group():
 
     return '', 204  # no page
 
-@app.route('/fight/<int:fight_id>/set_winner', methods=["POST"])
+@app.route('/api/fight/<int:fight_id>/set_winner', methods=["POST"])
 def fight_set_winner(fight_id):
     
     f = Fight.query.filter(Fight.id == fight_id).first()
@@ -119,7 +136,7 @@ def fight_set_winner(fight_id):
     
     return '', 204  # no page
 
-@app.route('/query', methods=["POST"])
+@app.route('/api/query', methods=["POST"])
 def query():
 
     if "competitors_matching" in request.form:
@@ -138,6 +155,11 @@ def query():
         return json.dumps(result)
     else:
         return ""
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
