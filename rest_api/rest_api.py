@@ -71,22 +71,18 @@ def define_change(cls):
 
 # register these actions for most of the db-models
 funcs = []
-for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, GroupCompetitorAssociation, Mode, Result]:
+for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, Mode, Result]:
     funcs.append(define_show(cls))
     funcs.append(define_add(cls))
     funcs.append(define_remove(cls))
     funcs.append(define_change(cls))
-    if cls != GroupCompetitorAssociation:
-        funcs.append(define_showall(cls))
 
 # add some more specific actions 
-# ... TODO
-
 @app.route('/api/tournament/<int:tournament_id>/groups', methods=["GET"])
 def tournamenet_show_groups(tournament_id):
     # get all groups belonging to tournament and jsonify
     groups = Group.query.filter(Group.tournament_id == tournament_id).all()
-    result = {"groups": [g.id for g in groups]}
+    result = {"groups": {g.id: g.serialize() for g in groups}}
     return jsonify(result)
 
 def group_add_competitor():
