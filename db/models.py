@@ -1,7 +1,18 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
-from .database import Base, Serializer
+from .database import Base
 import importlib
+
+# use this class to add JSON-export functionality
+class Serializer(object):
+    def serialize(self):
+        d = {}
+        # loop over all table-columns
+        for col in self.__table__.columns:
+            key = col.name
+            val = getattr(self, key)
+            d[key] = val
+        return d
 
 class GroupCompetitorAssociation(Base, Serializer):
     __tablename__ = "group_competitor_associations"

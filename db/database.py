@@ -12,25 +12,6 @@ db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-# use this class to add JSON-export functionality
-class Serializer(object):
-
-    def serialize(self):
-        # init dict to store values
-        d = {}
-
-        # loop over all table-columns
-        for col in self.__table__.columns:
-            key = col.name
-            val = getattr(self, key)
-            d[key] = val
-        
-        return d
-
-    def to_json(self):
-        return json.dumps(self.serialize())
-
-
 def init_db():
     import db.models
     Base.metadata.create_all(bind=engine)
