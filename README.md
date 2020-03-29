@@ -19,3 +19,8 @@ pip install flask sqlalchemy
 
 ### Javascript 12
 npm install react semantic-ui-react semantic-ui-css
+
+
+# Launch servers
+
+....
