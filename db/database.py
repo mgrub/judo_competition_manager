@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import and_, or_
 
 # define connectors
-engine = create_engine("sqlite:///configuration.db", echo=False)
+engine = create_engine("sqlite:///db/configuration.db", echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
 Base = declarative_base()
