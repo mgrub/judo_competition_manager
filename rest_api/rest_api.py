@@ -83,8 +83,7 @@ for cls in [Tournament, Club, Competitor, Age, Gender, Weight, Group, Fight, Mod
 def tournamenet_show_groups(tournament_id):
     # get all groups belonging to tournament and jsonify
     groups = Group.query.filter(Group.tournament_id == tournament_id).all()
-    #result = {"groups": {g.id: g.serialize() for g in groups}}
-    result = {"groups": [g.serialize() for g in groups]}
+    result = {"groups": [g.id for g in groups]}
     return jsonify(result)
 
 def group_add_competitor():
