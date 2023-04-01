@@ -1,5 +1,7 @@
 # Judo Competition Manager
 
+DISCLAIMER: This software is a work in progress and not even at an early alpha stage!
+
 ## What it does
 
 - Prepare, create, fill and evaluate competiton lists for judo tournaments
