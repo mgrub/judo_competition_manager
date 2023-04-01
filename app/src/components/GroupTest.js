@@ -59,21 +59,24 @@ export default class GroupTest extends Component{
         return(
             <div>
                 <Header />
-                <div class="ui vertical buttons">
-                {
-                    n_groups === 0 && 
-                    <p>No data fetched.</p>
-                }
-                {
-                    n_groups > 0 &&
-                        group_ids.map( (key, index) => {
-                            return(<Button toggle active={this.state.groups[key]} onClick={(event) => this.handleClick(event, key)}>{key}</Button>);
-                        })
-                }
+                <div class="ui visible left sidebar">
+                    {
+                        n_groups === 0 && 
+                        <p>No data fetched.</p>
+                    }
+                    {
+                        n_groups > 0 &&
+                            group_ids.map( (key, index) => {
+                                return(<Button toggle active={this.state.groups[key]} onClick={(event) => this.handleClick(event, key)}>{key}</Button>);
+                            })
+                    }
                 </div>
-                {this.state.error &&
-                    <h3>{this.state.error}</h3>
-                }
+                <div class="pusher">
+                    Content
+                    {this.state.error &&
+                        <h3>{this.state.error}</h3>
+                    }
+                </div>
             </div>
         );
     }
