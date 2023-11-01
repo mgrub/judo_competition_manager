@@ -1,8 +1,8 @@
 import sys
 sys.path.append(".")
 
-from .models import Gender, Age, WeightCollection, Weight, ModeCollection, Mode, Tournament, Group, Club, Competitor, GroupCompetitorAssociation
-from .database import init_db, db_session
+from db.models import Gender, Age, WeightCollection, Weight, ModeCollection, Mode, Tournament, Group, Club, Competitor, GroupCompetitorAssociation
+from db.database import init_db, db_session
 
 import random
 import string

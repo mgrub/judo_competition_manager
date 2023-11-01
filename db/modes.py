@@ -99,7 +99,7 @@ class ModeTemplate():
 
     def get_competitor_from(self, competitor_id, local_id=True):
         if local_id:
-            gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==local_competitor_id)).first()
+            gca = self.session.query(GroupCompetitorAssociation).filter(and_(GroupCompetitorAssociation.group==self.group, GroupCompetitorAssociation.local_lot==competitor_id)).first()
             if gca == None:
                 return None
             else:
